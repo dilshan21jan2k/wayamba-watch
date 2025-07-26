@@ -1,0 +1,543 @@
+/* --- RESET & BASE STYLES --- */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* --- PAGE STRUCTURE --- */
+.page-container,
+.container {
+  display: flex;
+  height: calc(100vh / 0.8); /* Adjust height to compensate for scale */
+  width: calc(100% / 0.8);   /* Adjust width similarly */
+  overflow: hidden;
+  transform: scale(0.8);
+  transform-origin: top left;
+}
+
+
+/* --- MAP STYLES --- */
+#map {
+  flex: 1;
+  height: 100%;
+  z-index: 0;
+  position: relative;
+}
+
+/* --- SIDEBAR STYLES --- */
+#left-sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 100%;
+  background-color: #4d615f;
+  box-shadow: 3px 0 12px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 12px;
+  box-sizing: border-box;
+}
+
+/* Inner scrollable container if content overflows */
+.sidebar-content {
+  display: flex;
+  flex-direction: column; /* title on top, cards container below */
+  align-items: stretch;
+  gap: 20px;
+  flex: 1;
+}
+.card-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}
+/* Title for the sidebar */
+#sidebar-title {
+  font-size: 3.1rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 30px; /* ⬅️ space below title */
+  padding-top: 30px;
+  padding-bottom: 6px;
+}
+
+.card-box {
+  background-color: #d4dadc;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 20px;
+  box-sizing: border-box;
+  max-height: fit-content;
+  min-height: 280px;
+  width: 38%;
+}
+/* Cards inside sidebar */
+.card-box {
+  flex: 1 1 48%;
+  background-color: #d4dadc;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 20px;
+  box-sizing: border-box;
+  max-height: fit-content;
+  min-height: 280px;
+}
+
+/* Optional: adjust card headings */
+.card-box h4 {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #4d615f;
+  margin-bottom: 14px;
+}
+
+/* --- LEGEND / FILTER --- */
+.floating-card label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 50px;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.floating-card div {
+  display: block;
+  margin-bottom: 10px;
+}
+
+#legend-filter-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- DATE FILTER SPECIFIC --- */
+#date-filter-card input[type="date"],
+#filter-date-btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+#date-filter-card input[type="date"] {
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+}
+
+#filter-date-btn {
+  background-color: #4d615f;
+  color: white;
+  font-weight: bold;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+#filter-date-btn:hover {
+  background-color: #000000;
+}
+/* --- BUTTONS --- */
+#today-btn {
+  margin-top: 20px;
+  padding: 15px 20px;
+  background-color: #5eb969;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#today-btn:hover {
+  background-color: #000000;
+}
+
+/* --- REPORT FORM --- */
+#report-form {
+  position: absolute;
+  top: 50%;
+  right: 34px;
+  transform: translateY(-50%);
+  width: 570px;
+  height: 1040px;
+  background-color: #4d615f;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 25px 25px 15px;
+  z-index: 1001;
+  box-sizing: border-box;
+}
+
+
+#report-form h3 {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+  color: #ffffff;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+#report-form label {
+  display: block;
+  margin-top: 18px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+#report-form select,
+#report-form textarea,
+#report-form input[type="file"] {
+  width: 100%;
+  margin-top: 5px;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  transition: border 0.2s;
+  background: #fff;
+}
+
+#report-form select:focus,
+#report-form textarea:focus,
+#report-form input[type="file"]:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+#report-form button {
+  margin-top: 435px;
+  width: 100%;
+  padding: 40px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  background-color: #5eb969;
+  color: #ffffff;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#report-form button:hover {
+  background-color: #000000;
+}
+
+#report-form .form-image {
+  width: 90%;
+  margin-top: 40px;
+  margin-left: 30px;
+  border-radius: 10px;
+  object-fit: contain;
+  opacity: 0.85;
+}
+
+/* --- LOCATE BUTTON --- */
+#locate-btn {
+  position: absolute;
+  bottom: 30px;
+  left: 800px;
+  z-index: 1000;
+  padding: 8px 12px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+#search-bar-container {
+  position: absolute;
+  top: 30px;
+  left: 630px; /* adjust based on your left sidebar width */
+  z-index: 1001;
+  background-color: white;
+  padding: 8px 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#location-search {
+  padding: 6px 10px;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#search-btn {
+  padding: 6px 12px;
+  background-color: #4d615f;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+#lottie-animation {
+  position: fixed;
+  bottom: 160px;
+  right: 70px;
+  width: 450px;
+  height: 450px;
+  z-index: 9999;
+}
+/* --- TOAST NOTIFICATIONS --- */
+#toast-container {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.toast {
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-top: 10px;
+  opacity: 0.95;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  animation: fadeInOut 3.5s forwards;
+  font-size: 14px;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(20px); }
+}
+.confirm-btn {
+  margin-top: 0px;
+  padding: 8px 34px; /* ↑ Bigger padding = larger button */
+  font-size: 15px;     /* ↑ Bigger text */
+  background-color: #4d615f;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 7px;   /* ↑ Slightly more rounded */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: inline-block;
+}
+.confirm-btn:hover {
+  background-color: #2e3b3a;
+}
+
+/* --- WHAT TO DO TIPS SECTION --- */
+#what-to-do {
+  margin-top: 0px;
+  padding: 0px 0px;
+  text-align: left;
+}
+
+#what-to-do h4 {
+  color: #ffffff;
+  font-size: 2.0rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  position: relative;
+  top: -10px;
+}
+
+#tip-text {
+  font-size: 1.2rem;
+  color: #ffffff;
+  line-height: 1.6;
+  font-weight: 500;
+  text-align: center;
+  min-height: 35px;
+  padding-left: 12px;
+  position: relative;
+  top: -10px;
+}
+
+#tip-animation {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+  position: relative;
+  top: 40px;
+}
+#incident-chart-wrapper {
+  margin-top: auto;
+  margin-bottom: auto;
+  padding: 0 16px;
+   
+}
+
+.chart-title {
+  text-align: center;
+  font-size: 1.7rem;
+  color: white;
+  margin-bottom: 20px;
+}
+
+#chart-flex {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  gap: 0px;
+}
+
+#incidentChart {
+  width: 250px !important;
+  height: 250px !important;
+  max-width: 250px;
+  max-height: 250px;
+  display: block;
+}
+
+#chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 120px;
+  max-width: 160px;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  color: white;
+}
+
+.chart-legend-color {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  border-radius: 3px;
+}
+
+/* Hide default checkbox */
+.custom-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+/* Wrapper layout */
+.custom-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 10px;
+  cursor: pointer;
+  user-select: none; 
+  margin-bottom: 4px; 
+}
+
+/* Custom square box */
+.custom-checkbox .checkmark {
+  height: 18px;
+  width: 18px;
+  background-color: #e0e0e0;
+  border: 2px solid #aaa;
+  border-radius: 4px;
+  position: relative;
+}
+
+/* The tick ✔ when checked */
+.custom-checkbox input:checked + .checkmark::after {
+  content: '🗸';
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #4d615f; /* ✅ Change tick color here */
+}
+#map-month-label {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4d615f;
+  color: white;
+  padding: 10px 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Notification button */
+
+#notify-wrapper {
+  position: absolute;
+  top: 50px;
+  right: 620px;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#notify-btn {
+  width: 160px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #0088cc;
+  color: white;
+  text-decoration: none;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease;
+  border: 6px solid white;
+}
+
+#notify-btn:hover {
+  background-color: #0077b3;
+}
+
+#notify-btn img {
+  width: 25px;
+  height: 25px;
+}
+
+#notify-lottie {
+  width: 80px;
+  height: 80px;
+}

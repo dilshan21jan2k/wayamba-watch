@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Alert System - Sri Lanka</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content Container */
+        .main-content {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+            min-height: calc(100vh - 80px);
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Home Page */
+        .hero {
+            background: linear-gradient(135deg, rgba(30,60,114,0.9) 0%, rgba(42,82,152,0.9) 100%), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%23f0f8ff" width="1200" height="600"/><path fill="%23e6f3ff" d="M0,300L50,320C100,340,200,380,300,380C400,380,500,340,600,320C700,300,800,280,900,290C1000,300,1100,340,1150,360L1200,380V600H1150C1100,600,1000,600,900,600C800,600,700,600,600,600C500,600,400,600,300,600C200,600,100,600,50,600H0V300Z"/></svg>');
+            background-size: cover;
+            background-position: center;
+            height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-content p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        /* Map Page */
+        #map-page {
+            position: relative;
+            height: calc(100vh - 80px);
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Enhanced Floating Cards */
+        .floating-card {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            z-index: 1001;
+            font-family: inherit;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        #filter-card {
+            top: 20px;
+            left: 20px;
+            width: 280px;
+        }
+
+        #legend-card {
+            top: 20px;
+            left: 320px;
+            width: 280px;
+        }
+
+        #report-form {
+            top: 20px;
+            right: 20px;
+            width: 400px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #1e3c72;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Form Enhancements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group select,
+        .form-group textarea,
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .form-group select:focus,
+        .form-group textarea:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        }
+
+        /* Analytics Page */
+        .analytics-container {
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .analytics-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .analytics-header h2 {
+            font-size: 2.5rem;
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #1e3c72;
+        }
+
+        /* About Page */
+        .about-container {
+            padding: 60px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .about-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .about-content h2 {
+            color: #1e3c72;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .about-content p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .floating-card {
+                position: relative !important;
+                width: 90% !important;
+                margin: 10px auto !important;
+                top: auto !important;
+                left: auto !important;
+                right: auto !important;
+            }
+            
+            #map-page .floating-card {
+                position: absolute !important;
+                width: 280px !important;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Status Messages */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                PublicAlert LK
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" onclick="showPage('home')" class="active">Home</a></li>
+                <li><a href="#" onclick="showPage('map')">Live Map</a></li>
+                <li><a href="#" onclick="showPage('analytics')">Analytics</a></li>
+                <li><a href="#" onclick="showPage('about')">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Home Page -->
+        <section id="home" class="page-section active">
+            <div class="hero">
+                <div class="hero-content">
+                    <h1>Stay Informed, Stay Safe</h1>
+                    <p>Real-time public alerts and incident reporting system for Sri Lanka. Report incidents, track emergencies, and help build a safer community together.</p>
+                    <div class="cta-buttons">
+                        <button class="btn btn-primary" onclick="showPage('map')">
+                            <i class="fas fa-map-marked-alt"></i>
+                            View Live Map
+                        </button>
+                        <button class="btn btn-secondary" onclick="showPage('analytics')">
+                            <i class="fas fa-chart-bar"></i>
+                            View Analytics
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Page -->
+        <section id="map" class="page-section">
+            <div id="map-page">
+                <!-- Filter Card -->
+                <div id="filter-card" class="floating-card">
+                    <h4 class="card-title">Filter by Type</h4>
+                    <div class="form-group">
+                        <label><input type="checkbox" class="filter-check" value="Flood" checked /> <i class="fas fa-water" style="color: #3498db;"></i> Flood</label>
+                        <label><input type="checkbox" class="filter-check" value="Fire" checked /> <i class="fas fa-fire" style="color: #e74c3c;"></i> Fire</label>
+                        <label><input type="checkbox" class="filter-check" value="Roadblock" checked /> <i class="fas fa-road" style="color: #f39c12;"></i> Road Block</label>
+                        <label><input type="checkbox" class="filter-check" value="RoadAccident" checked /> <i class="fas fa-car-crash" style="color: #e67e22;"></i> Road Accident</label>
+                        <label><input type="checkbox" class="filter-check" value="PowerCut" checked /> <i class="fas fa-bolt" style="color: #f1c40f;"></i> Power Cut</label>
+                        <label><input type="checkbox" class="filter-check" value="PublicViolence" checked /> <i class="fas fa-exclamation-triangle" style="color: #8e44ad;"></i> Public Violence</label>
+                        <label><input type="checkbox" class="filter-check" value="Other" checked /> <i class="fas fa-question-circle" style="color: #95a5a6;"></i> Other</label>
+                    </div>
+                </div>
+
+                <!-- Legend Card -->
+                <div id="legend-card" class="floating-card">
+                    <h4 class="card-title">Legend</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div><i class="fas fa-water" style="color: #3498db; width: 20px;"></i> Flood Incidents</div>
+                        <div><i class="fas fa-fire" style="color: #e74c3c; width: 20px;"></i> Fire Incidents</div>
+                        <div><i class="fas fa-road" style="color: #f39c12; width: 20px;"></i> Road Blocks</div>
+                        <div><i class="fas fa-car-crash" style="color: #e67e22; width: 20px;"></i> Road Accidents</div>
+                        <div><i class="fas fa-bolt" style="color: #f1c40f; width: 20px;"></i> Power Cuts</div>
+                        <div><i class="fas fa-exclamation-triangle" style="color: #8e44ad; width: 20px;"></i> Public Violence</div>
+                        <div><i class="fas fa-question-circle" style="color: #95a5a6; width: 20px;"></i> Other</div>
+                    </div>
+                </div>
+
+                <!-- Report Form -->
+                <div id="report-form" class="floating-card">
+                    <h3 class="card-title">Report New Incident</h3>
+                    
+                    <div class="form-group">
+                        <label for="incidentType">Type of Incident:</label>
+                        <select id="incidentType">
+                            <option value="Flood">Flood</option>
+                            <option value="Fire">Fire</option>
+                            <option value="Roadblock">Road Block</option>
+                            <option value="RoadAccident">Road Accident</option>
+                            <option value="PowerCut">Power Cut</option>
+                            <option value="PublicViolence">Public Violence</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea id="description" rows="3" placeholder="Describe what happened..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image">Upload Image (optional):</label>
+                        <input type="file" id="image" accept="image/*" />
+                    </div>
+
+                    <div style="background: #e8f4f8; padding: 15px; border-radius: 10px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 0.9rem; color: #2c5282;">
+                            <i class="fas fa-map-pin" style="color: #3182ce;"></i>
+                            Click on the map to select the incident location
+                        </p>
+                    </div>
+
+                    <div id="submit-status"></div>
+                    
+                    <button id="submit-btn" class="btn btn-primary" onclick="submitIncident()" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit Incident
+                    </button>
+                </div>
+
+                <!-- Map -->
+                <div id="map-container" style="height: 100%; width: 100%;"></div>
+
+                <!-- Locate Button -->
+                <button id="locate-btn" class="btn btn-secondary" style="
+                    position: absolute;
+                    bottom: 30px;
+                    left: 20px;
+                    z-index: 1000;
+                ">
+                    <i class="fas fa-location-arrow"></i>
+                    My Location
+                </button>
+            </div>
+        </section>
+
+        <!-- Analytics Page -->
+        <section id="analytics" class="page-section">
+            <div class="analytics-container">
+                <div class="analytics-header">
+                    <h2>Analytics Dashboard</h2>
+                    <p>Real-time insights and data analysis of reported incidents</p>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-incidents">-</div>
+                        <div class="stat-label">Total Incidents</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="today-incidents">-</div>
+                        <div class="stat-label">Today's Reports</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="most-common-type">-</div>
+                        <div class="stat-label">Most Common</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="active-districts">-</div>
+                        <div class="stat-label">Active Districts</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <div class="chart-title">Incident Types Distribution</div>
+                        <canvas id="typeChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Timeline (Last 30 Days)</div>
+                        <canvas id="timelineChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Page -->
+        <section id="about" class="page-section">
+            <div class="about-container">
+                <div class="about-content">
+                    <h2>About PublicAlert LK</h2>
+                    <p>
+                        PublicAlert LK is a comprehensive public safety platform designed to enhance community resilience and emergency preparedness across Sri Lanka. Our system enables real-time reporting and tracking of various incidents including natural disasters, infrastructure issues, and public safety concerns.
+                    </p>
+                    <p>
+                        By leveraging modern web technologies and community participation, we aim to create a safer, more informed society where citizens can actively contribute to public safety and emergency response efforts.
+                    </p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-map-marked-alt"></i>
+                            </div>
+                            <h3>Real-time Mapping</h3>
+                            <p>Interactive maps showing live incident data with precise location tracking</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h3>Mobile Friendly</h3>
+                            <p>Optimized for mobile devices to report incidents on the go</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3>Data Analytics</h3>
+                            <p>Comprehensive analytics to identify patterns and improve response</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // Navigation functionality
+        function showPage(pageName) {
+            // Hide all sections
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from nav links
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(pageName).classList.add('active');
+            
+            // Add active class to clicked nav link
+            event.target.classList.add('active');
+            
+            // Initialize map if map page is selected
+            if (pageName === 'map' && !window.mapInitialized) {
+                initializeMap();
+            }
+            
+            // Load analytics if analytics page is selected
+            if (pageName === 'analytics') {
+                loadAnalytics();
+            }
+        }
+
+        // Mock Firebase functionality for demo
+        const mockIncidents = [
+            {
+                type: 'Flood',
+                description: 'Heavy flooding reported in central area',
+                lat: 6.9271,
+                lng: 79.8612,
+                timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                type: 'Fire',
+                description: 'Building fire reported',
+                lat: 7.2906,
+                lng: 80.6337,
+                timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                type: 'RoadAccident',
+                description: 'Traffic accident on main highway',
+                lat: 6.0535,
+                lng: 80.2210,
+                timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+            }
+        ];
+
+        let map, incidentLayerGroup, selectedLatLng = null;
+
+        function initializeMap() {
+            map = L.map('map-container').setView([7.8731, 80.7718], 8);
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            incidentLayerGroup = L.layerGroup().addTo(map);
+
+            // Map click handler
+            map.on('click', function (e) {
+                selectedLatLng = e.latlng;
+                showAlert('Location selected: ' + selectedLatLng.lat.toFixed(4) + ', ' + selectedLatLng.lng.toFixed(4), 'success');
+            });
+
+            loadIncidents();
+            setupFilters();
+            setupLocationButton();
+            window.mapInitialized = true;
+        }
+
+        function getIcon(type) {
+            const icons = {
+                'Flood': 'fas fa-water',
+                'Fire': 'fas fa-fire',
+                'Roadblock': 'fas fa-road',
+                'RoadAccident': 'fas fa-car-crash',
+                'PowerCut': 'fas fa-bolt',
+                'PublicViolence': 'fas fa-exclamation-triangle',
+                'Other': 'fas fa-question-circle'
+            };
+
+            const colors = {
+                'Flood': '#3498db',
+                'Fire': '#e74c3c',
+                'Roadblock': '#f39c12',
+                'RoadAccident': '#e67e22',
+                'PowerCut': '#f1c40f',
+                'PublicViolence': '#8e44ad',
+                'Other': '#95a5a6'
+            };
+
+            return L.divIcon({
+                html: `<i class="${icons[type]}" style="color: ${colors[type]}; font-size: 20px;"></i>`,
+                iconSize: [25, 25],
+                iconAnchor: [12, 25],
+                popupAnchor: [0, -20],
+                className: 'custom-div-icon'
+            });
+        }
+
+        function loadIncidents() {
+            if (!incidentLayerGroup) return;
+            
+            incidentLayerGroup.clearLayers();
+            const selectedTypes = getSelectedTypes();
+
+            mockIncidents.forEach(incident => {
+                if (!selectedTypes.includes(incident.type)) return;
+
+                const marker = L.marker([incident.lat, incident.lng], {
+                    icon: getIcon(incident.type)
+                }).addTo(incidentLayerGroup);
+
+                const popupContent = `
+                    <div style="min-width: 200px;">
+                        <h4 style="margin: 0 0 10px 0; color: #1e3c72;">${incident.type}</h4>
+                        <p style="margin: 0 0 10px 0;"><strong>Description:</strong> ${incident.description}</p>
+                        <p style="margin: 0; font-size: 0.8rem; color: #666;">
+                            <i class="fas fa-clock"></i> ${new Date(incident.timestamp).toLocaleString()}
+                        </p>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+            });
+        }
+
+        function getSelectedTypes() {
+            return Array.from(document.querySelectorAll('.filter-check:checked')).map(cb => cb.value);
+        }
+
+        function setupFilters() {
+            document.querySelectorAll('.filter-check').forEach(cb => {
+                cb.addEventListener('change', loadIncidents);
+            });
+        }
+
+        function setupLocationButton() {
+            document.getElementById('locate-btn').addEventListener('click', function () {
+                if (!navigator.geolocation) {
+                    showAlert('Geolocation is not supported by your browser.', 'error');
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+
+                        const userMarker = L.marker

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.8">
+  <title>Public Alert and Incident Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://unpkg.com/lottie-web@5.12.0/build/player/lottie.min.js"></script>
+  <script src="https://unpkg.com/leaflet-pip/leaflet-pip.min.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+  <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+  </head>
+
+<body>
+
+  <div id="map-month-label">Showing incidents of August</div>
+
+<!-- 📣 Notify Me Button -->
+<div id="notify-wrapper">
+  <a href="https://t.me/wayamba_watch" target="_blank" id="notify-btn">
+    <span>Notify me</span>
+    <img src="img/telegram-icon.png" alt="Telegram" />
+  </a>
+  <div id="notify-lottie"></div>
+</div>
+
+
+<script>
+  lottie.loadAnimation({
+    container: document.getElementById('notify-lottie'),
+    renderer: 'svg',
+    loop: true,
+    autoplay: true,
+    path: 'animations/bell.json' // replace with your bell icon JSON
+  });
+</script>
+
+<!-- LEFT SIDEBAR PANEL -->
+<div id="left-sidebar">
+  <div class="sidebar-content">
+    
+    <!-- 🔹 Title -->
+    <div id="sidebar-title">WAYAMBA WATCH</div>
+
+    <!-- 🔹 Card Wrapper for Two Side-by-Side Cards -->
+    <div class="card-wrapper">
+
+      <!--  Legend + Type Filter Card -->
+      <div class="card-box" id="legend-filter-card">
+  <h4>FILTER BY TYPE</h4>
+
+  <label class="custom-checkbox">
+    <input type="checkbox" class="filter-check" value="Flood" checked />
+    <span class="checkmark"></span>
+    <img src="img/flood.png" width="18" /> Flood
+  </label>
+
+  <label class="custom-checkbox">
+    <input type="checkbox" class="filter-check" value="Fire" checked />
+    <span class="checkmark"></span>
+    <img src="img/fire.png" width="18" /> Fire
+  </label>
+
+  <label class="custom-checkbox">
+    <input type="checkbox" class="filter-check" value="Roadblock" checked />
+    <span class="checkmark"></span>
+    <img src="img/roadblock.png" width="18" /> Road Block
+  </label>
+
+  <label class="custom-checkbox">
+    <input type="checkbox" class="filter-check" value="RoadAccident" checked />
+    <span class="checkmark"></span>
+    <img src="img/roadaccident.png" width="18" /> Road Accident
+  </label>
+
+  <label class="custom-checkbox">
+    <input type="checkbox" class="filter-check" value="PowerCut" checked />
+    <span class="checkmark"></span>
+    <img src="img/powercut.png" width="18" /> Power Cut
+  </label>
+
+  <label class="custom-checkbox">
+    <input type="checkbox" class="filter-check" value="PublicViolence" checked />
+    <span class="checkmark"></span>
+    <img src="img/publicviolence.png" width="18" /> Public Violence
+  </label>
+
+  <label class="custom-checkbox">
+    <input type="checkbox" class="filter-check" value="Other" checked />
+    <span class="checkmark"></span>
+    <img src="img/other.png" width="18" /> Other
+  </label>
+</div>
+
+
+      <!--  Date Filter Card -->
+      <div class="card-box" id="date-filter-card">
+        <h4>FILTER BY DATE</h4>
+        <label for="start-date">From:</label>
+        <input type="date" id="start-date" />
+        <label for="end-date">To:</label>
+        <input type="date" id="end-date" />
+        <button id="filter-date-btn">See Incidents</button>
+      </div>
+    </div>
+    <!-- 🔹 Button to filter today's incidents -->
+    <button id="today-btn">See Today's Incidents</button>
+     </div>
+
+    <!-- Donut Chart Section (NO card box) -->
+    <div id="incident-chart-wrapper">
+      <h4 id="chart-title" class="chart-title">Loading...</h4>
+      <div id="chart-flex">
+        <canvas id="incidentChart"></canvas>
+        <div id="chart-legend"></div>
+      </div>
+    </div>
+
+
+     <!-- 🔻 What to Do Section -->
+  <div id="tip-animation"></div>
+<div id="what-to-do">
+  <h4>IN CASE OF…</h4>
+  <div id="tip-text"></div>
+</div>
+
+
+</div>
+
+
+  <!-- See My Location Button -->
+  <button id="locate-btn" title="See My Location" style="
+    position: absolute;
+    bottom: 130px;
+    left: 630px; /* right next to 600px wide sidebar */
+    z-index: 1000;
+    padding: 8px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  ">
+  <img src="img/location-icon.png" alt="Locate Me" style="width: 24px; height: 24px;" />
+</button>
+
+<!-- 🔍 Zoom In Button -->
+<button id="zoom-in-btn" title="Zoom In" style="
+  position: absolute;
+  bottom: 80px;  /* 70px above the locate-btn */
+  left: 630px;
+  z-index: 1000;
+  padding: 8px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+">
+  <img src="img/plus-icon.png" alt="Zoom In" style="width: 24px; height: 24px;" />
+</button>
+
+<!-- 🔍 Zoom Out Button -->
+<button id="zoom-out-btn" title="Zoom Out" style="
+  position: absolute;
+  bottom: 30px;  /* 35px above the locate-btn */
+  left: 630px;
+  z-index: 1000;
+  padding: 8px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+">
+  <img src="img/minus-icon.png" alt="Zoom Out" style="width: 24px; height: 24px;" />
+</button>
+
+
+<div id="search-bar-container">
+  <input type="text" id="location-search" placeholder="Search location..." />
+  <button id="search-btn">Search</button>
+</div>
+  <!-- Fullscreen map -->
+  <div id="map"></div>
+
+  <!-- Floating Report Form -->
+  <div id="report-form">
+   <h3 style="color: #ffffff;">REPORT A NEW INCIDENT</h3>
+
+    <label for="incidentType">Type of Incident:</label>
+    <select id="incidentType">
+      <option value="Flood">Flood</option>
+      <option value="Fire">Fire</option>
+      <option value="Roadblock">Road Block</option>
+      <option value="RoadAccident">Road Accident</option>
+      <option value="PowerCut">Power Cut</option>
+      <option value="PublicViolence">Public Violence</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label for="description">Short Description:</label>
+    <textarea id="description" rows="3" placeholder="Describe what happened..."></textarea>
+
+    <label for="image">Upload Image (optional):</label>
+    <input type="file" id="image" accept="image/*" />
+
+    <p style="margin-top: 25px; font-size: 0.9rem; color: #ffffff">📍 Click on the map to select the location.</p>
+
+    <button onclick="submitIncident()">Submit Incident</button>
+
+    <div id="lottie-animation"></div>
+
+
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Firebase SDKs (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+  <!-- Your app's main JavaScript -->
+  <script src="js/script.js"></script>
+  
+<div id="toast-container"></div>
+</body>
+</html>
