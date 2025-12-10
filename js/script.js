@@ -260,7 +260,7 @@ const telegramMessage = `${heading}\n\n` +
   `Reported At: ${new Date().toLocaleString()}\n\n` +
   `Stay alert and follow safety guidelines.\n#WayambaWatch #PublicAlert`;
 
-const telegramUrl = `https://api.telegram.org/bot8232864913:AAG_e2xqQ1a9rj5UKV3YrJYZc_UAgW-dorU/sendMessage?chat_id=@wayamba_watch&text=${encodeURIComponent(telegramMessage)}&parse_mode=Markdown`;
+const telegramUrl = `https://api.telegram.org/bot8308815089:AAGY5YqG-OGrfTw8HpBoPS29uhzls_R0UGk/sendMessage?chat_id=@wayambawatch&text=${encodeURIComponent(telegramMessage)}&parse_mode=Markdown`;
 
 fetch(telegramUrl)
   .then(res => {
@@ -732,4 +732,5 @@ function showMonthMessage() {
     label.style.opacity = 0;
   }, 3000);
 }
+
 
